@@ -39,10 +39,7 @@ jobs:
           fi
 
       - name: Grant Execute Permission to Gradle
-        run: |
-          rm -rf gradle/wrapper/
-          gradle wrapper --gradle-version 8.7
-          chmod +x gradlew || true
+        run: chmod +x gradlew || true
 
       - name: Execute Robolectric Tests
         run: ./gradlew :app:testDebugUnitTest --continue
