@@ -31,11 +31,24 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN_HERE")
 FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "wfseek-secure")
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "") # Restrict sensitive commands to this specific Telegram Chat ID
 
 if BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":
     print("[WARNING] Please configure your TELEGRAM_BOT_TOKEN in .env or system coordinates.")
 
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# Authorization helper
+def is_admin(message):
+    if not ADMIN_CHAT_ID:
+        # If no admin ID is set, temporarily allow all (so it doesn't break pre-setup)
+        return True
+    try:
+        # Support single ID or comma-separated list of Admin IDs
+        admins = [x.strip() for x in ADMIN_CHAT_ID.split(",") if x.strip()]
+        return str(message.chat.id) in admins
+    except Exception:
+        return False
 
 # Base URL details for Firebase Realtime Database
 def get_db_url(path):
@@ -48,8 +61,16 @@ def generate_random_token(prefix="", length=8):
     return f"WFS-{prefix}-{rand_part}"
 
 # Command: /start
-@bot.message_code_handler if hasattr(bot, 'message_code_handler') else bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
+    if not is_admin(message):
+        bot.send_message(
+            message.chat.id, 
+            "🛑 *Access Denied!*\nYour Telegram Chat ID (`" + str(message.chat.id) + "`) is not whitelisted in the developer's server configuration.\n\nPlease purchase or verify your credentials.",
+            parse_mode="Markdown"
+        )
+        return
+
     help_text = (
         "🤖 *Welcome to the Wfseek Node Administrator Bot!* 🤖\n\n"
         "Use me to manage, generate, and expire access licenses securely:\n\n"
@@ -69,6 +90,9 @@ def send_welcome(message):
 # Command: /weekly
 @bot.message_handler(commands=['weekly'])
 def make_weekly(message):
+    if not is_admin(message):
+        bot.reply_to(message, "🛑 *Unauthorised access!* Admin authorization required.")
+        return
     token = generate_random_token("WKL", 6)
     db_path = f"tokens/{token}"
     
@@ -99,6 +123,9 @@ def make_weekly(message):
 # Command: /monthly
 @bot.message_handler(commands=['monthly'])
 def make_monthly(message):
+    if not is_admin(message):
+        bot.reply_to(message, "🛑 *Unauthorised access!* Admin authorization required.")
+        return
     token = generate_random_token("MTH", 6)
     db_path = f"tokens/{token}"
     
@@ -129,6 +156,9 @@ def make_monthly(message):
 # Command: /family <LabelName>
 @bot.message_handler(commands=['family'])
 def make_family(message):
+    if not is_admin(message):
+        bot.reply_to(message, "🛑 *Unauthorised access!* Admin authorization required.")
+        return
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         bot.reply_to(message, "⚠️ Usage: `/family <Name/Label>`\nExample: `/family MichaelChukwuemeka`")
@@ -166,6 +196,9 @@ def make_family(message):
 # Command: /list
 @bot.message_handler(commands=['list'])
 def list_tokens(message):
+    if not is_admin(message):
+        bot.reply_to(message, "🛑 *Unauthorised access!* Admin authorization required.")
+        return
     try:
         r = requests.get(get_db_url("tokens"))
         if r.status_code != 200:
@@ -201,6 +234,9 @@ def list_tokens(message):
 # Command: /expire <TokenOrName>
 @bot.message_handler(commands=['expire'])
 def expire_token(message):
+    if not is_admin(message):
+        bot.reply_to(message, "🛑 *Unauthorised access!* Admin authorization required.")
+        return
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         bot.reply_to(message, "⚠️ Usage: `/expire <TokenCode_OR_FamilyLabelName>`\nExample: `/expire WFS-FAM-ABC123`")
