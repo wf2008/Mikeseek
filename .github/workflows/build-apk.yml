@@ -34,27 +34,27 @@ jobs:
           fi
           # If the user has configured global app keys as secrets, inject them
           if [ ! -z "${{ secrets.GEMINI_API_KEY }}" ]; then
-            # Replace placeholder with actual secret
             sed -i "s|GEMINI_API_KEY=.*|GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}|g" .env
           fi
 
-      - name: Grant Execute Permission to Gradle
+      - name: Decode Signing Keystores
         run: |
-          gradle wrapper --gradle-version 8.7
-          chmod +x gradlew || true
+          # Decode the committed Base64 keystore once and reuse it for both
+          # debug and release signing configurations.
+          if [ -f debug.keystore.base64 ] && [ -s debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > my-upload-key.jks
+            cp my-upload-key.jks debug.keystore
+            echo "Decoded keystore size: $(wc -c < my-upload-key.jks) bytes"
+          else
+            echo "::error::debug.keystore.base64 missing or empty"
+            exit 1
+          fi
+
+      - name: Grant Execute Permission to gradlew
+        run: chmod +x gradlew
 
       - name: Execute Robolectric Tests
-        run: ./gradlew :app:testDebugUnitTest --continue
-
-      - name: Base64 Decode Signing Keystore
-        run: |
-          # Use hardcoded Base64 keystore for automatic seamless signing on private repo
-          if [ -f debug.keystore.base64 ] && [ -s debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > my-upload-key.jks || true
-          fi
-          if [ ! -f my-upload-key.jks ] || [ ! -s my-upload-key.jks ]; then
-            echo "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" | base64 -d > my-upload-key.jks
-          fi
+        run: ./gradlew :app:testDebugUnitTest --continue --stacktrace
 
       - name: Build Debug & Release APKs
         env:
@@ -62,10 +62,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'android' }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'android' }}
         run: |
-          # Build a debug test APK
           ./gradlew assembleDebug --stacktrace
-          
-          # Always assemble the Release APK signed using the decoded private key
           ./gradlew assembleRelease --stacktrace
 
       - name: Archive Debug APK
@@ -74,6 +71,7 @@ jobs:
         with:
           name: wfseek-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
 
       - name: Archive Release APK
         if: success() && hashFiles('app/build/outputs/apk/release/app-release.apk') != ''
