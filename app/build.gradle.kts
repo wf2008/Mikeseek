@@ -24,9 +24,9 @@ android {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
       storeFile = file(keystorePath)
-      storePassword = if (!System.getenv("STORE_PASSWORD").isNullOrEmpty()) System.getenv("STORE_PASSWORD") else "android"
+      storePassword = "android"
       keyAlias = "upload"
-      keyPassword = if (!System.getenv("KEY_PASSWORD").isNullOrEmpty()) System.getenv("KEY_PASSWORD") else "android"
+      keyPassword = "android"
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")

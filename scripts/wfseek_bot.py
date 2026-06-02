@@ -22,19 +22,17 @@ import os
 import random
 import string
 import requests
-from dotenv import load_dotenv
 import telebot
 from telebot import types
 
 # Load secret environment variables
-load_dotenv()
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN_HERE")
-FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "wfdmike")
-ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "") # Restrict sensitive commands to this specific Telegram Chat ID
+BOT_TOKEN = "8718427616:AAHYowExRdCa9DR_dudrBK0UR7Ws5cxDNn4"
+FIREBASE_PROJECT_ID = "wfdmike"
+ADMIN_CHAT_ID = "8523591598" # Restrict sensitive commands to this specific Telegram Chat ID
 
-if BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":
-    print("[WARNING] Please configure your TELEGRAM_BOT_TOKEN in .env or system coordinates.")
+if BOT_TOKEN == "your_telegram_bot_token_here":
+    print("[WARNING] Please configure your TELEGRAM_BOT_TOKEN in the script.")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
