@@ -34,22 +34,27 @@ jobs:
           fi
           # If the user has configured global app keys as secrets, inject them
           if [ ! -z "${{ secrets.GEMINI_API_KEY }}" ]; then
-            # Replace placeholder with actual secret
             sed -i "s|GEMINI_API_KEY=.*|GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}|g" .env
           fi
 
-      - name: Grant Execute Permission to Gradle
-        run: chmod +x gradlew || true
-
-      - name: Execute Robolectric Tests
-        run: ./gradlew :app:testDebugUnitTest --continue
-
       - name: Decode Signing Keystores
         run: |
+          # Decode the committed Base64 keystore once and reuse it for both
+          # debug and release signing configurations.
           if [ -f debug.keystore.base64 ] && [ -s debug.keystore.base64 ]; then
-            base64 -di debug.keystore.base64 > my-upload-key.jks || base64 -d debug.keystore.base64 > my-upload-key.jks || true
-            cp my-upload-key.jks debug.keystore || true
+            base64 -d debug.keystore.base64 > my-upload-key.jks
+            cp my-upload-key.jks debug.keystore
+            echo "Decoded keystore size: $(wc -c < my-upload-key.jks) bytes"
+          else
+            echo "::error::debug.keystore.base64 missing or empty"
+            exit 1
           fi
+
+      - name: Grant Execute Permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Execute Robolectric Tests
+        run: ./gradlew :app:testDebugUnitTest --continue --stacktrace
 
       - name: Build Debug & Release APKs
         env:
@@ -58,10 +63,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'androiddebugkey' }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'android' }}
         run: |
-          # Build a debug test APK
           ./gradlew assembleDebug --stacktrace
-          
-          # Always assemble the Release APK signed using the decoded private key
           ./gradlew assembleRelease --stacktrace
 
       - name: Archive Debug APK
@@ -70,6 +72,7 @@ jobs:
         with:
           name: wfseek-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
 
       - name: Archive Release APK
         if: success() && hashFiles('app/build/outputs/apk/release/app-release.apk') != ''
