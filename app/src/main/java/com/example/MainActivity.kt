@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -877,7 +878,7 @@ fun WfseekBatteryGateView(
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(12.dp),
-            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
+            border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
         ) {
             Icon(Icons.Default.Settings, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
@@ -1257,7 +1258,7 @@ fun PurchaseCodeButtons(modifier: Modifier = Modifier) {
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Telegram Admin Contact",
                         modifier = Modifier.size(14.dp),
                         tint = Color.White
@@ -1938,7 +1939,7 @@ fun ArbitrageCard(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B)),
                     modifier = Modifier.weight(1.1f).height(42.dp)
                 ) {
-                    Icon(Icons.Default.Send, contentDescription = "Send Alert", modifier = Modifier.size(14.dp))
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send Alert", modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Telegram", fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
                 }
@@ -2223,7 +2224,7 @@ fun SettingsTab(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Send,
+                            imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Telegram Integration",
                             tint = Color(0xFF00E5FF),
                             modifier = Modifier.size(20.dp)
