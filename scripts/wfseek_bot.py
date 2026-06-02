@@ -30,7 +30,7 @@ from telebot import types
 load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN_HERE")
-FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "wfseek-secure")
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "wfdmike")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "") # Restrict sensitive commands to this specific Telegram Chat ID
 
 if BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":

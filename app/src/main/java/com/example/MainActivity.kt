@@ -2138,7 +2138,7 @@ fun SettingsTab(
                         FirebaseService.saveProjectId(context, it)
                     },
                     label = { Text("Firebase Project ID", color = Color(0xFF94A3B8), fontSize = 11.sp) },
-                    placeholder = { Text("e.g. wfseek-secure", color = Color.Gray, fontSize = 11.sp) },
+                    placeholder = { Text("e.g. wfdmike", color = Color.Gray, fontSize = 11.sp) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,

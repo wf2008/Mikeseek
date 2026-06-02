@@ -18,8 +18,8 @@ object FirebaseService {
     private const val PREFS_NAME = "firebase_service_prefs"
 
     // Default configuration (can be updated from the app settings UI)
-    private const val DEFAULT_PROJECT_ID = "wfseek-secure"
-    private const val DEFAULT_API_KEY = "AIzaSyFake_DefaultKeyForWfseekAppCompilation"
+    private const val DEFAULT_PROJECT_ID = "wfdmike"
+    private const val DEFAULT_API_KEY = "AIzaSyDy9LJYmchzRjkctseNCwYs_dGxqvADXFU"
 
     fun getProjectId(context: Context): String {
         val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

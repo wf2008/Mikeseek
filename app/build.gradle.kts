@@ -11,7 +11,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.batteryopt.bgopt"
+    applicationId = "wfseek.app"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
@@ -24,9 +24,9 @@ android {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
       storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
+      storePassword = if (!System.getenv("STORE_PASSWORD").isNullOrEmpty()) System.getenv("STORE_PASSWORD") else "android"
       keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+      keyPassword = if (!System.getenv("KEY_PASSWORD").isNullOrEmpty()) System.getenv("KEY_PASSWORD") else "android"
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
