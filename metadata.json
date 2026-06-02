@@ -1,0 +1,6 @@
+{
+  "name": "Wfseek",
+  "description": "Deals with arbitrage opportunities by comparing odds from Nigerian bookmakers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,79 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK & Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Create local.properties and Inject Secrets
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          # If the user has configured global app keys as secrets, inject them
+          if [ ! -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          else
+            echo "GEMINI_API_KEY=mock_fallback_gemini_key" >> .env
+          fi
+
+      - name: Grant Execute Permission to Gradle
+        run: chmod +x gradlew || true
+
+      - name: Execute Robolectric Tests
+        run: ./gradlew :app:testDebugUnitTest --continue
+
+      - name: Base64 Decode Signing Keystore
+        run: |
+          # If KEYSTORE_BASE64 secret is available, decode it into a .jks file for secure release signing
+          if [ ! -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+          else
+            echo "No KEYSTORE_BASE64 found, release build will use placeholder if needed."
+          fi
+
+      - name: Build Debug & Release APKs
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          # Build a debug test APK
+          ./gradlew assembleDebug --stacktrace
+          
+          # Try to build release APK if secret is available, otherwise log a warning
+          if [ ! -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            ./gradlew assembleRelease --stacktrace
+          else
+            echo "Skipping Release APK assembly as signing keys were not found in secrets."
+          fi
+
+      - name: Archive Debug APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wfseek-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Archive Release APK
+        if: success() && hashFiles('app/build/outputs/apk/release/app-release.apk') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: wfseek-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
