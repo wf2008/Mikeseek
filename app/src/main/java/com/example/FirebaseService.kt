@@ -45,9 +45,19 @@ object FirebaseService {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
     }
 
+    /**
+     * Returns true whenever a non-empty Firebase Web API key is available.
+     *
+     * The DEFAULT_PROJECT_ID / DEFAULT_API_KEY hardcoded above are the
+     * Wfseek project's real Firebase credentials, so the app is considered
+     * "live" out of the box. Users can override them from the in-app
+     * Settings -> Firebase Sync Connection panel if they want to point the
+     * app at their own Firebase project.
+     */
     fun isConfigured(context: Context): Boolean {
         val apiKey = getApiKey(context)
-        return apiKey.isNotEmpty() && apiKey != DEFAULT_API_KEY
+        val projectId = getProjectId(context)
+        return apiKey.isNotBlank() && projectId.isNotBlank()
     }
 
     // High fidelity data model for Auth Result
